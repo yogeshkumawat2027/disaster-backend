@@ -13,7 +13,9 @@ yarn.lock
 .env.test
 .env.production
 
+# Firebase service account (contains secret keys - never commit these!)
+config/*.json
+
 # Logs
 logs/
 *.log
-
