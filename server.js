@@ -7,6 +7,10 @@ const app = express();
 // Import Routes
 const authRoutes = require('./routes/authRoutes');
 const rescueTeamRoutes = require('./routes/rescueTeamRoutes');
+const emergencyRoutes = require('./routes/emergencyRoutes');
+
+// Import Firebase
+require('./config/firebase');
 
 // Import Models for testing
 const User = require('./models/User');
@@ -47,6 +51,7 @@ app.get('/', (req, res) => {
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/rescue-team', rescueTeamRoutes);
+app.use('/api/emergency', emergencyRoutes);
 
 ;
 
