@@ -1,5 +1,17 @@
 const express = require('express');
+const mongoose = require('mongoose');
+require('dotenv').config();
+
 const app = express();
+
+// Import Routes
+const authRoutes = require('./routes/authRoutes');
+const rescueTeamRoutes = require('./routes/rescueTeamRoutes');
+
+// Connect to MongoDB
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('✅ MongoDB Connected Successfully'))
+  .catch((err) => console.error('❌ MongoDB Connection Error:', err));
 
 // Middleware
 app.use(express.json());
@@ -19,9 +31,16 @@ app.use((req, res, next) => {
 
 // Basic GET API - Shows backend is working
 app.get('/', (req, res) => {
-    
-    res.send(" Api is working")
+    const dbStatus = mongoose.connection.readyState === 1 ? 'Database connected' : 'Database not connected';
+    res.json({
+        message: 'API is running',
+        database: dbStatus
+    });
 });
+
+// API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/rescue-team', rescueTeamRoutes);
 
 ;
 
