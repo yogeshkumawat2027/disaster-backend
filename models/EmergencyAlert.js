@@ -93,11 +93,10 @@ emergencyAlertSchema.index({ status: 1 });
 emergencyAlertSchema.index({ type: 1 });
 
 // Update location coordinates before saving
-emergencyAlertSchema.pre('save', function(next) {
+emergencyAlertSchema.pre('save', async function() {
   if (this.isModified('latitude') || this.isModified('longitude')) {
     this.location.coordinates = [this.longitude, this.latitude];
   }
-  next();
 });
 
 module.exports = mongoose.model('EmergencyAlert', emergencyAlertSchema);
