@@ -9,8 +9,10 @@ router.get('/nearby', emergencyController.getNearbyAlerts);
 router.get('/statistics', emergencyController.getStatistics);
 router.get('/:id', emergencyController.getAlertById);
 
+// Create alert - no auth required (userId validated from body)
+router.post('/', emergencyController.createAlert);
+
 // Protected routes
-router.post('/', protect, emergencyController.createAlert);
 router.put('/:id/status', protect, emergencyController.updateAlertStatus);
 router.delete('/:id', protect, emergencyController.deleteAlert);
 

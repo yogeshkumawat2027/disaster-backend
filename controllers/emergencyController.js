@@ -32,8 +32,12 @@ class EmergencyController {
         user: userId,
         type: type || 'OTHER',
         message,
-        latitude,
-        longitude,
+        latitude: parseFloat(latitude),
+        longitude: parseFloat(longitude),
+        location: {
+          type: 'Point',
+          coordinates: [parseFloat(longitude), parseFloat(latitude)]
+        },
         address: address || '',
         range: range || 5,
         severity: severity || 'MEDIUM',
@@ -45,30 +49,37 @@ class EmergencyController {
 
       console.log('✅ Emergency alert created:', alert._id);
 
-      // Find nearby users within range
-      const nearbyUsers = await User.find({
-        _id: { $ne: userId }, // Exclude the user who created the alert
-        location: {
-          $near: {
-            $geometry: {
-              type: 'Point',
-              coordinates: [longitude, latitude]
-            },
-            $maxDistance: range * 1000 // Convert km to meters
+      // Find nearby users within range (wrapped in try/catch to avoid crashing if geo index not ready)
+      let nearbyUsers = [];
+      try {
+        nearbyUsers = await User.find({
+          _id: { $ne: userId },
+          location: {
+            $near: {
+              $geometry: {
+                type: 'Point',
+                coordinates: [longitude, latitude]
+              },
+              $maxDistance: range * 1000
+            }
           }
-        }
-      }).limit(100);
-
-      console.log(`📍 Found ${nearbyUsers.length} nearby users within ${range}km`);
+        }).limit(100);
+        console.log(`📍 Found ${nearbyUsers.length} nearby users within ${range}km`);
+      } catch (geoErr) {
+        console.warn('⚠️ Geospatial query failed (no 2dsphere index or invalid coords), skipping notifications:', geoErr.message);
+      }
 
       // Send notifications to nearby users
       if (nearbyUsers.length > 0) {
-        const notificationResult = await notificationService.sendNotificationToNearbyUsers(nearbyUsers, alert, user);
-        alert.notifiedUsers = nearbyUsers.map(u => u._id);
-        alert.affectedCount = nearbyUsers.length;
-        await alert.save();
-        
-        console.log(`📲 Notifications sent to ${nearbyUsers.length} users`);
+        try {
+          await notificationService.sendNotificationToNearbyUsers(nearbyUsers, alert, user);
+          alert.notifiedUsers = nearbyUsers.map(u => u._id);
+          alert.affectedCount = nearbyUsers.length;
+          await alert.save();
+          console.log(`📲 Notifications sent to ${nearbyUsers.length} users`);
+        } catch (notifErr) {
+          console.warn('⚠️ Notification send failed:', notifErr.message);
+        }
       }
 
       // Populate user data

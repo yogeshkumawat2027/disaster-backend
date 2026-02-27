@@ -1,8 +1,14 @@
 const admin = require('firebase-admin');
 const path = require('path');
+const fs = require('fs');
 
 let firebaseInitialized = false;
 
+// Prevent duplicate initialization
+if (admin.apps.length > 0) {
+  firebaseInitialized = true;
+  console.log('✅ Firebase already initialized');
+} else
 try {
   // Option 1: Direct service account JSON file in config folder
   const serviceAccountPath = path.join(__dirname, 'smart-disaster-managemen-a9d01-firebase-adminsdk-fbsvc-fee34ed54b.json');
