@@ -36,6 +36,10 @@ exports.register = async (req, res) => {
     // Generate token - auto login after register
     const token = generateToken(user._id);
 
+    // Save token to user document
+    user.token = token;
+    await user.save();
+
     res.status(201).json({
       success: true,
       message: 'User registered and logged in successfully',
@@ -96,6 +100,10 @@ exports.login = async (req, res) => {
     // Generate token
     const token = generateToken(user._id);
 
+    // Save token to user document
+    user.token = token;
+    await user.save();
+
     res.status(200).json({
       success: true,
       message: 'Login successful',
@@ -152,6 +160,66 @@ exports.updateLocation = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error updating location',
+      error: error.message
+    });
+  }
+};
+
+// Logout User
+exports.logout = async (req, res) => {
+  try {
+    const userId = req.user.id; // From auth middleware
+
+    // Clear token from user document
+    await User.findByIdAndUpdate(userId, { token: null });
+
+    res.status(200).json({
+      success: true,
+      message: 'Logged out successfully'
+    });
+  } catch (error) {
+    console.error('Logout Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error logging out',
+      error: error.message
+    });
+  }
+};
+
+// Get Current User
+exports.getCurrentUser = async (req, res) => {
+  try {
+    const userId = req.user.id; // From auth middleware
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        latitude: user.latitude,
+        longitude: user.longitude,
+        currentLocation: user.currentLocation,
+        isActive: user.isActive,
+        createdAt: user.createdAt
+      }
+    });
+  } catch (error) {
+    console.error('Get Current User Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching user',
       error: error.message
     });
   }

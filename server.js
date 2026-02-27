@@ -42,73 +42,7 @@ app.get('/', (req, res) => {
 });
 
 // Test API - Create User
-app.post('/create-user', async (req, res) => {
-    try {
-        const { name, email, phone, password, latitude, longitude, currentLocation } = req.body;
 
-        // Check if user already exists
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'User with this email already exists' 
-            });
-        }
-
-        // Create new user
-        const user = new User({
-            name,
-            email,
-            phone,
-            password,
-            latitude: latitude || 0,
-            longitude: longitude || 0,
-            currentLocation: currentLocation || ''
-        });
-
-        await user.save();
-
-        res.status(201).json({
-            success: true,
-            message: 'User created successfully',
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                phone: user.phone,
-                latitude: user.latitude,
-                longitude: user.longitude,
-                currentLocation: user.currentLocation,
-                createdAt: user.createdAt
-            }
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Error creating user',
-            error: error.message
-        });
-    }
-});
-
-// Test API - Get All Users
-app.get('/get-users', async (req, res) => {
-    try {
-        const users = await User.find().select('-password');
-        
-        res.status(200).json({
-            success: true,
-            count: users.length,
-            users: users
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Error fetching users',
-            error: error.message
-        });
-    }
-});
 
 // API Routes
 app.use('/api/auth', authRoutes);

@@ -25,6 +25,14 @@ const userSchema = new mongoose.Schema({
     minlength: 6,
     select: false
   },
+  fcmToken: {
+    type: String,
+    default: null
+  },
+  token: {
+    type: String,
+    default: null
+  },
   location: {
     type: {
       type: String,
