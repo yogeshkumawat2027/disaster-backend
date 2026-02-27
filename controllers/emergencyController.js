@@ -1,6 +1,6 @@
 const EmergencyAlert = require('../models/EmergencyAlert');
 const User = require('../models/User');
-const { sendEmergencyNotification, sendNotificationToNearbyUsers } = require('../services/notificationService');
+const notificationService = require('../services/notificationService');
 
 class EmergencyController {
   // Create emergency alert
@@ -63,7 +63,7 @@ class EmergencyController {
 
       // Send notifications to nearby users
       if (nearbyUsers.length > 0) {
-        const notificationResult = await sendNotificationToNearbyUsers(nearbyUsers, alert, user);
+        const notificationResult = await notificationService.sendNotificationToNearbyUsers(nearbyUsers, alert, user);
         alert.notifiedUsers = nearbyUsers.map(u => u._id);
         alert.affectedCount = nearbyUsers.length;
         await alert.save();
