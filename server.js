@@ -91,6 +91,25 @@ app.post('/create-user', async (req, res) => {
     }
 });
 
+// Test API - Get All Users
+app.get('/get-users', async (req, res) => {
+    try {
+        const users = await User.find().select('-password');
+        
+        res.status(200).json({
+            success: true,
+            count: users.length,
+            users: users
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching users',
+            error: error.message
+        });
+    }
+});
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/rescue-team', rescueTeamRoutes);
